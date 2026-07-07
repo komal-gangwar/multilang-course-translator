@@ -22,7 +22,6 @@ SUPPORTED_TRANSLATION_MODELS = [
     "meta-llama/llama-3-1-8b",
     "meta-llama/llama-3-3-70b-gptq",
     "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-    "ibm/granite-4-h-small",
     "ibm/granite-8b-code-instruct",
     "mistralai/mistral-large-2512",
     "mistralai/mistral-medium-2505",
