@@ -147,12 +147,20 @@ def translate_document():
     rag_used = False
     try:
         vs = get_vector_store()
-        # Use first ~300 chars as a representative query
-        query = source_text[:300]
-        rag_context = vs.build_context_string(query, k=5, score_threshold=0.25)
+        if vs.index is None or vs.index.ntotal == 0:
+            # Vector store not yet populated — try re-initializing from glossary
+            logger.info("Vector store empty — re-initializing knowledge base...")
+            from app.rag.vector_store import initialize_knowledge_base
+            initialize_knowledge_base()
+        # Use first 500 chars as query; lower threshold catches more glossary matches
+        query = source_text[:500]
+        rag_context = vs.build_context_string(query, k=6, score_threshold=0.15)
         rag_used = bool(rag_context.strip())
+        logger.info(f"RAG retrieval: {'found context' if rag_used else 'no relevant context'} "
+                    f"(index size: {vs.index.ntotal if vs.index else 0})")
     except Exception as e:
-        logger.warning(f"RAG retrieval failed: {e}")
+        logger.error(f"RAG retrieval failed: {e}", exc_info=True)
+        # Do not re-raise — translation can proceed without RAG context
 
     # Build prompts
     system_prompt = build_system_prompt(
@@ -314,3 +322,77 @@ def stats():
 def test_watsonx():
     result = test_connection()
     return jsonify(result)
+
+
+# ── RAG diagnostics ───────────────────────────────────────────────────────────
+
+@api_bp.route("/rag-status", methods=["GET"])
+def rag_status():
+    """
+    Diagnostic endpoint — returns the current state of the vector store.
+    Visit /api/rag-status in the browser to verify RAG is working.
+    """
+    try:
+        import app.rag.vector_store as vs_module
+        from app.rag.vector_store import get_vector_store, initialize_knowledge_base
+
+        vs = get_vector_store()
+
+        if vs.index is None or vs.index.ntotal == 0:
+            initialize_knowledge_base()
+
+        index_size = vs.index.ntotal if vs.index else 0
+        test_query = request.args.get("q", "photosynthesis derivative algorithm")
+        results = vs.search(test_query, k=3)
+        snippets = [
+            {"score": round(s, 4), "source": m.get("source", ""), "preview": t[:120]}
+            for t, m, s in results
+        ]
+
+        # Report the model that is ACTUALLY loaded in memory, not the raw env value
+        # (the guard in vector_store.py may have overridden a bad env value)
+        actual_model = (
+            vs_module._embedder.tokenizer.name_or_path
+            if vs_module._embedder is not None
+            else os.getenv("EMBEDDING_MODEL", vs_module._DEFAULT_EMBEDDING_MODEL)
+        )
+
+        return jsonify({
+            "status": "ok",
+            "index_size": index_size,
+            "embedding_model": actual_model,
+            "env_embedding_model": os.getenv("EMBEDDING_MODEL", vs_module._DEFAULT_EMBEDDING_MODEL),
+            "store_path": os.getenv("VECTOR_STORE_PATH", "app/data/vector_store"),
+            "test_query": test_query,
+            "top_results": snippets,
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+
+@api_bp.route("/rag-rebuild", methods=["POST"])
+def rag_rebuild():
+    """Force-rebuild the vector store from the academic glossary JSON."""
+    try:
+        import app.rag.vector_store as vs_module
+        from app.rag.vector_store import initialize_knowledge_base
+
+        # Reset both singletons so the embedder and index are recreated fresh
+        vs_module._vector_store = None
+        vs_module._embedder = None
+
+        initialize_knowledge_base()
+
+        vs = vs_module.get_vector_store()
+        actual_model = (
+            vs_module._embedder.tokenizer.name_or_path
+            if vs_module._embedder is not None
+            else vs_module._DEFAULT_EMBEDDING_MODEL
+        )
+        return _ok({
+            "message": "Vector store rebuilt successfully.",
+            "index_size": vs.index.ntotal if vs.index else 0,
+            "embedding_model": actual_model,
+        })
+    except Exception as e:
+        return _error(f"Rebuild failed: {e}", 500)

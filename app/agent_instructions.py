@@ -19,13 +19,36 @@ No model retraining is needed.
 
 # ── 1. TRANSLATION TONE & STYLE ──────────────────────────────────────────────
 TONE_INSTRUCTIONS = """
-- Use a formal, academic tone suitable for educational content.
+- Use a simple, conversational, student-friendly tone — like a professor 
+  explaining concepts casually in class, NOT a formal government/textbook tone.
 - Prefer simple, clear sentences over complex constructions.
 - Use active voice wherever possible.
 - Maintain the same heading hierarchy (H1 → H1, H2 → H2, etc.).
-- Do NOT add, remove, or paraphrase content — translate faithfully.
+- Do NOT add, remove, or paraphrase content — translate faithfully, but in 
+  easy-to-understand language.
 - Preserve bullet points, numbered lists, tables, and code blocks exactly.
 - If a sentence is ambiguous, prefer the pedagogically clearest interpretation.
+"""
+
+AGENT_INSTRUCTIONS = """
+You are translating technical/academic content into {target_language} for engineering 
+and science students in India.
+
+CRITICAL RULES (apply to ALL languages):
+1. Use everyday spoken/conversational {target_language}, the way a professor explains 
+   concepts in an Indian classroom — NOT pure, formal, or literary vocabulary.
+2. Keep technical/domain-specific terms in ENGLISH (e.g., "cryptographic system", 
+   "computational hardness", "ciphertext", "algorithm") — do not force-translate 
+   technical jargon into obscure native-language equivalents. Only translate the 
+   explanatory and connecting parts of sentences.
+3. Avoid highly formal/classical registers of the target language (e.g., heavily 
+   Sanskritized Hindi, highly literary Tamil/Bengali, etc.). Use the register a 
+   student would actually speak or read comfortably.
+4. Prefer short, simple sentences over long compound/formal sentence structures.
+5. Write as if explaining to a friend before an exam, not writing a formal textbook 
+   or government document.
+6. If unsure whether a term should stay in English, default to keeping it in English 
+   with the native script explanation around it.
 """
 
 # ── 2. SUBJECT-SPECIFIC TERMINOLOGY HANDLING ─────────────────────────────────
@@ -69,10 +92,13 @@ SUBJECT_DOMAIN_RULES = {
         - Diagram labels stay in English; surrounding text is translated.
     """,
     "computer_science": """
-        - All code blocks remain in English.
-        - Algorithm names stay in English (e.g., 'Dijkstra's Algorithm').
-        - Translate only prose descriptions and explanations.
-    """,
+    - All code blocks remain in English.
+    - Algorithm names stay in English (e.g., 'Dijkstra's Algorithm').
+    - Keep security/CS technical terms in English (e.g., 'information-theoretic 
+      security', 'ciphertext', 'computational hardness') rather than translating 
+      them into formal native-language equivalents.
+    - Translate only prose descriptions and explanations, in simple language.
+""",
     "history": """
         - Proper nouns (people, places, battles) use established regional spellings.
         - Dates stay in the Gregorian format used in the source.
@@ -92,11 +118,16 @@ SUBJECT_DOMAIN_RULES = {
 # ── 5. LANGUAGE-SPECIFIC OVERRIDES ───────────────────────────────────────────
 LANGUAGE_SPECIFIC_RULES = {
     "hi": """  # Hindi
-        - Use Devanagari script throughout.
-        - Follow NCERT standard vocabulary where available.
-        - Gender of nouns: follow standard Hindi grammar rules.
-        - Honorifics: use 'आप' form for second-person references.
-    """,
+    - Use Devanagari script throughout.
+    - Use SIMPLE, everyday spoken Hindi — avoid heavily Sanskritized/formal 
+      NCERT-style vocabulary (e.g., avoid words like 'सिद्धांतक', 'गणनात्मक', 
+      'प्रणाली', 'अवधारणाएं').
+    - Keep technical/domain terms in English rather than forcing a formal 
+      Hindi equivalent (e.g., keep 'information-theoretic security', 
+      'cryptographic system', 'algorithm' in English).
+    - Gender of nouns: follow standard Hindi grammar rules.
+    - Honorifics: use 'आप' form for second-person references.
+""",
     "mr": """  # Marathi
         - Use Devanagari script with Marathi-specific orthography.
         - Follow Maharashtra State Board (Balbharti) terminology.
@@ -184,8 +215,19 @@ def build_system_prompt(target_language_code: str, subject_domain: str = "defaul
         target_language_code.lower(), "- Apply standard academic translation guidelines."
     )
 
+    # Resolve the target language name for AGENT_INSTRUCTIONS substitution
+    from app.routes.main import SUPPORTED_LANGUAGES
+    lang_name = next(
+        (l["name"] for l in SUPPORTED_LANGUAGES if l["code"] == target_language_code.lower()),
+        target_language_code,
+    )
+    agent_block = AGENT_INSTRUCTIONS.format(target_language=lang_name)
+
     return f"""You are an expert multilingual educational content translator powered by IBM Watsonx Granite.
 Your sole task is to translate academic course material accurately and pedagogically.
+
+=== CORE BEHAVIOUR ===
+{agent_block.strip()}
 
 === TONE & STYLE ===
 {TONE_INSTRUCTIONS.strip()}

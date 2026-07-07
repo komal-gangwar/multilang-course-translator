@@ -745,12 +745,15 @@
         <i class="bi bi-clock-history"></i> Translation History
       </a>
 
-      <div class="nav-section-label" style="margin-top:8px;">Resources</div>
+      <div class="nav-section-label" style="margin-top:8px;">Diagnostics</div>
       <a href="/api/test-connection" target="_blank" class="nav-link">
-        <i class="bi bi-plug-fill"></i> API Status
+        <i class="bi bi-plug-fill"></i> Watsonx Status
       </a>
-      <a href="/api/stats" target="_blank" class="nav-link">
-        <i class="bi bi-bar-chart-fill"></i> Raw Stats
+      <a href="/api/rag-status" target="_blank" class="nav-link">
+        <i class="bi bi-database-check"></i> RAG Status
+      </a>
+      <a href="#" onclick="rebuildRag(event)" class="nav-link">
+        <i class="bi bi-arrow-clockwise"></i> Rebuild RAG Index
       </a>
     </nav>
 
@@ -868,6 +871,22 @@
       if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
       if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
       return `${Math.floor(diff/86400)}d ago`;
+    }
+
+    // ── Rebuild RAG index ────────────────────────────────────────────────────
+    function rebuildRag(e) {
+      e.preventDefault();
+      showToast('Rebuilding RAG index from glossary…', 'info');
+      fetch('/api/rag-rebuild', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            showToast(`RAG rebuilt — ${data.index_size} chunks indexed.`, 'success');
+          } else {
+            showToast('Rebuild failed: ' + (data.error || 'unknown error'), 'error');
+          }
+        })
+        .catch(e => showToast('Rebuild error: ' + e.message, 'error'));
     }
   </script>
 

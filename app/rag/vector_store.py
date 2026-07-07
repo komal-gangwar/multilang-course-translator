@@ -21,14 +21,32 @@ _embedder = None
 _faiss = None
 
 
+# The canonical free multilingual embedding model — no HuggingFace auth required.
+# If EMBEDDING_MODEL is set in .env, it overrides this default.
+_DEFAULT_EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+
+# IBM Granite embedding models require HuggingFace authentication (gated repos).
+# Reject them and fall back to the safe default so RAG doesn't break on startup.
+_GATED_MODEL_PREFIXES = ("ibm/granite-embedding", "ibm/granite-3-embedding")
+
+
 def _get_embedder():
     global _embedder
     if _embedder is None:
         from sentence_transformers import SentenceTransformer
-        model_name = os.getenv(
-            "EMBEDDING_MODEL",
-            "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-        )
+
+        model_name = os.getenv("EMBEDDING_MODEL", _DEFAULT_EMBEDDING_MODEL)
+
+        # Guard: reject gated IBM models that need HF auth
+        if any(model_name.lower().startswith(p) for p in _GATED_MODEL_PREFIXES):
+            logger.warning(
+                f"EMBEDDING_MODEL='{model_name}' is a gated HuggingFace repo that "
+                f"requires authentication and is not publicly available. "
+                f"Falling back to '{_DEFAULT_EMBEDDING_MODEL}'. "
+                f"Update EMBEDDING_MODEL in your .env file to fix this permanently."
+            )
+            model_name = _DEFAULT_EMBEDDING_MODEL
+
         logger.info(f"Loading embedding model: {model_name}")
         _embedder = SentenceTransformer(model_name)
     return _embedder
