@@ -1,0 +1,42 @@
+## ============================================================
+##  Multi-language Course Content Translator Agent
+##  requirements.txt  — Python 3.10+
+## ============================================================
+
+# --- Web framework ---
+flask>=3.0.3
+flask-sqlalchemy>=3.1.1
+flask-migrate>=4.0.7
+Werkzeug>=3.0.3
+
+# --- IBM Watsonx SDK ---
+ibm-watsonx-ai>=1.1.2
+ibm-cloud-sdk-core>=3.20.3
+
+# --- Document parsing ---
+PyMuPDF>=1.24.9           # PDF extraction (fitz)
+python-pptx>=1.0.2        # PowerPoint extraction
+python-docx>=1.1.2        # Word document extraction
+openpyxl>=3.1.5           # Excel support
+Pillow>=10.4.0            # Image handling
+
+# --- RAG / Vector store ---
+sentence-transformers>=3.1.1
+faiss-cpu>=1.8.0
+numpy>=1.26.4
+langchain>=0.3.1
+langchain-community>=0.3.1
+
+# --- Text processing ---
+tiktoken>=0.7.0
+chardet>=5.2.0
+ftfy>=6.2.0
+
+# --- Environment / config ---
+python-dotenv>=1.0.1
+
+# --- Utilities ---
+requests>=2.32.3
+urllib3>=2.2.3
+tqdm>=4.66.5
+python-dateutil>=2.9.0

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Documents{% endblock %}
+{% block page_title %}<i class="bi bi-folder2-open me-2"></i>Documents{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 fade-in-up">
+  <div>
+    <p class="text-muted mb-0" style="font-size:14px;">
+      {{ documents | length }} document{{ 's' if documents | length != 1 }} uploaded
+    </p>
+  </div>
+  <a href="/translate" class="btn-ibm">
+    <i class="bi bi-upload me-1"></i> Upload New
+  </a>
+</div>
+
+{% if documents %}
+<div class="row g-3" id="docGrid">
+  {% for doc in documents %}
+  <div class="col-sm-6 col-lg-4 fade-in-up" style="animation-delay:{{ loop.index0 * 0.04 }}s;">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column">
+        <!-- Header row -->
+        <div class="d-flex align-items-start gap-3 mb-3">
+          <div style="font-size:36px;line-height:1;flex-shrink:0;">
+            {% if doc.file_type == 'pdf' %}📄
+            {% elif doc.file_type == 'presentation' %}📊
+            {% elif doc.file_type == 'document' %}📝
+            {% else %}📃{% endif %}
+          </div>
+          <div style="min-width:0;flex:1;">
+            <div class="fw-600" style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;"
+                 title="{{ doc.original_filename }}">
+              {{ doc.original_filename }}
+            </div>
+            <div style="font-size:11.5px;color:var(--text-muted-custom);margin-top:3px;">
+              {% if doc.file_size %}
+                {% set kb = (doc.file_size / 1024) | round(1) %}
+                {% if kb > 1024 %}{{ (kb / 1024) | round(1) }} MB{% else %}{{ kb }} KB{% endif %}
+              {% endif %}
+              · {{ doc.word_count | default(0) }} words
+              · {{ doc.page_count | default(0) }}
+              {% if doc.file_type == 'presentation' %}slides{% else %}pages{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags row -->
+        <div class="d-flex flex-wrap gap-1 mb-3">
+          <span class="badge-lang" style="font-size:11px;">{{ doc.file_type }}</span>
+          <span class="badge-lang" style="font-size:11px;background:rgba(0,125,121,0.1);color:var(--ibm-teal);">{{ doc.subject_domain }}</span>
+          <span class="status-badge {{ doc.status }}" style="font-size:10px;">{{ doc.status }}</span>
+        </div>
+
+        <!-- Metadata -->
+        <div style="font-size:11.5px;color:var(--text-muted-custom);margin-bottom:3px;">
+          <i class="bi bi-calendar3 me-1"></i>
+          {% if doc.upload_date %}{{ doc.upload_date.strftime('%d %b %Y, %H:%M') }}{% endif %}
+        </div>
+        <div style="font-size:11.5px;color:var(--text-muted-custom);margin-bottom:auto;">
+          <i class="bi bi-translate me-1"></i>
+          {{ doc.translations | length }} translation{{ 's' if doc.translations | length != 1 }}
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-2 mt-3">
+          <a href="/translate?doc_id={{ doc.id }}" class="btn-ibm flex-1 justify-content-center"
+             style="font-size:12.5px;padding:8px 12px;">
+            <i class="bi bi-translate"></i> Translate
+          </a>
+          <button class="btn-ghost" onclick="deleteDoc({{ doc.id }}, '{{ doc.original_filename }}')"
+                  style="padding:8px 10px;font-size:14px;color:var(--ibm-red);"
+                  title="Delete document">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5 fade-in-up">
+  <div style="font-size:64px;opacity:0.3;margin-bottom:16px;">📭</div>
+  <h5 class="fw-600" style="font-weight:600;">No documents yet</h5>
+  <p class="text-muted mb-4" style="font-size:14px;">
+    Upload a PDF, PPTX, DOCX, or text file to get started.
+  </p>
+  <a href="/translate" class="btn-ibm">
+    <i class="bi bi-upload me-1"></i> Upload Your First Document
+  </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function deleteDoc(id, name) {
+    if (!confirm(`Delete "${name}"?\n\nThis will also remove all its translations.`)) return;
+    fetch(`/api/documents/${id}`, { method: 'DELETE' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          showToast('Document deleted.', 'success');
+          setTimeout(() => window.location.reload(), 800);
+        } else {
+          showToast(data.error || 'Delete failed.', 'error');
+        }
+      })
+      .catch(e => showToast('Error: ' + e.message, 'error'));
+  }
+</script>
+{% endblock %}

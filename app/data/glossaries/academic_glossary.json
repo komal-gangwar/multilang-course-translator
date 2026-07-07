@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "title": "Academic & Technical Glossary for Indian Education",
+    "sources": ["NCERT", "UGC", "CBSE", "State Boards"],
+    "version": "1.0"
+  },
+  "mathematics": {
+    "derivative": {"hi": "अवकलज", "mr": "अवकलज", "ta": "வகைக்கெழு", "bn": "অবকল"},
+    "integral": {"hi": "समाकलन", "mr": "समाकलन", "ta": "தொகை", "bn": "সমাকল"},
+    "matrix": {"hi": "आव्यूह", "mr": "मॅट्रिक्स", "ta": "அணி", "bn": "ম্যাট্রিক্স"},
+    "probability": {"hi": "प्रायिकता", "mr": "संभाव्यता", "ta": "நிகழ்தகவு", "bn": "সম্ভাবনা"},
+    "function": {"hi": "फलन", "mr": "फलन", "ta": "சார்பு", "bn": "ফাংশন"},
+    "vector": {"hi": "सदिश", "mr": "सदिश", "ta": "திசையன்", "bn": "ভেক্টর"},
+    "theorem": {"hi": "प्रमेय", "mr": "प्रमेय", "ta": "தேற்றம்", "bn": "উপপাদ্য"},
+    "equation": {"hi": "समीकरण", "mr": "समीकरण", "ta": "சமன்பாடு", "bn": "সমীকরণ"},
+    "geometry": {"hi": "ज्यामिति", "mr": "भूमिती", "ta": "வடிவியல்", "bn": "জ্যামিতি"},
+    "algebra": {"hi": "बीजगणित", "mr": "बीजगणित", "ta": "இயற்கணிதம்", "bn": "বীজগণিত"}
+  },
+  "science": {
+    "photosynthesis": {"hi": "प्रकाश संश्लेषण", "mr": "प्रकाश संश्लेषण", "ta": "ஒளிச்சேர்க்கை", "bn": "সালোকসংশ্লেষণ"},
+    "osmosis": {"hi": "परासरण", "mr": "परासरण", "ta": "சவ்வூடு பரவல்", "bn": "অভিস্রবণ"},
+    "nucleus": {"hi": "केन्द्रक", "mr": "केंद्रक", "ta": "உட்கரு", "bn": "নিউক্লিয়াস"},
+    "atom": {"hi": "परमाणु", "mr": "अणु", "ta": "அணு", "bn": "পরমাণু"},
+    "molecule": {"hi": "अणु", "mr": "रेणू", "ta": "மூலக்கூறு", "bn": "অণু"},
+    "evolution": {"hi": "विकास", "mr": "उत्क्रांती", "ta": "பரிணாமம்", "bn": "বিবর্তন"},
+    "chromosome": {"hi": "गुणसूत्र", "mr": "गुणसूत्र", "ta": "நிறமூர்த்தம்", "bn": "ক্রোমোজোম"},
+    "catalyst": {"hi": "उत्प्रेरक", "mr": "उत्प्रेरक", "ta": "x觸媒", "bn": "অনুঘটক"},
+    "hypothesis": {"hi": "परिकल्पना", "mr": "गृहीतक", "ta": "கருதுகோள்", "bn": "অনুকল্প"},
+    "experiment": {"hi": "प्रयोग", "mr": "प्रयोग", "ta": "சோதனை", "bn": "পরীক্ষা-নিরীক্ষা"}
+  },
+  "computer_science": {
+    "algorithm": {"hi": "एल्गोरिदम (Algorithm)", "mr": "अल्गोरिदम (Algorithm)", "ta": "வழிமுறை (Algorithm)", "bn": "অ্যালগরিদম (Algorithm)"},
+    "database": {"hi": "डेटाबेस (Database)", "mr": "डेटाबेस (Database)", "ta": "தரவுத்தளம் (Database)", "bn": "ডেটাবেস (Database)"},
+    "network": {"hi": "नेटवर्क (Network)", "mr": "नेटवर्क (Network)", "ta": "வலையமைப்பு (Network)", "bn": "নেটওয়ার্ক (Network)"},
+    "programming": {"hi": "प्रोग्रामिंग (Programming)", "mr": "प्रोग्रामिंग (Programming)", "ta": "நிரலாக்கம் (Programming)", "bn": "প্রোগ্রামিং (Programming)"},
+    "software": {"hi": "सॉफ्टवेयर (Software)", "mr": "सॉफ्टवेअर (Software)", "ta": "மென்பொருள் (Software)", "bn": "সফটওয়্যার (Software)"},
+    "hardware": {"hi": "हार्डवेयर (Hardware)", "mr": "हार्डवेअर (Hardware)", "ta": "வன்பொருள் (Hardware)", "bn": "হার্ডওয়্যার (Hardware)"},
+    "artificial_intelligence": {"hi": "कृत्रिम बुद्धिमत्ता (AI)", "mr": "कृत्रिम बुद्धिमत्ता (AI)", "ta": "செயற்கை நுண்ணறிவு (AI)", "bn": "কৃত্রিম বুদ্ধিমত্তা (AI)"},
+    "machine_learning": {"hi": "मशीन लर्निंग (Machine Learning)", "mr": "मशीन लर्निंग (Machine Learning)", "ta": "இயந்திர கற்றல் (Machine Learning)", "bn": "মেশিন লার্নিং (Machine Learning)"}
+  },
+  "economics": {
+    "inflation": {"hi": "मुद्रास्फीति", "mr": "महागाई", "ta": "பணவீக்கம்", "bn": "মুদ্রাস্ফীতি"},
+    "gdp": {"hi": "सकल घरेलू उत्पाद (GDP)", "mr": "एकूण देशांतर्गत उत्पादन (GDP)", "ta": "மொத்த உள்நாட்டு உற்பத்தி (GDP)", "bn": "মোট অভ্যন্তরীণ উৎপাদন (GDP)"},
+    "demand": {"hi": "माँग", "mr": "मागणी", "ta": "தேவை", "bn": "চাহিদা"},
+    "supply": {"hi": "आपूर्ति", "mr": "पुरवठा", "ta": "வழங்கல்", "bn": "সরবরাহ"},
+    "market": {"hi": "बाज़ार", "mr": "बाजार", "ta": "சந்தை", "bn": "বাজার"},
+    "capital": {"hi": "पूँजी", "mr": "भांडवल", "ta": "மூலதனம்", "bn": "মূলধন"}
+  },
+  "history": {
+    "civilization": {"hi": "सभ्यता", "mr": "सभ्यता", "ta": "நாகரிகம்", "bn": "সভ্যতা"},
+    "revolution": {"hi": "क्रांति", "mr": "क्रांती", "ta": "புரட்சி", "bn": "বিপ্লব"},
+    "independence": {"hi": "स्वतंत्रता", "mr": "स्वातंत्र्य", "ta": "சுதந்திரம்", "bn": "স্বাধীনতা"},
+    "democracy": {"hi": "लोकतंत्र", "mr": "लोकशाही", "ta": "ஜனநாயகம்", "bn": "গণতন্ত্র"},
+    "constitution": {"hi": "संविधान", "mr": "संविधान", "ta": "அரசியலமைப்பு", "bn": "সংবিধান"},
+    "parliament": {"hi": "संसद", "mr": "संसद", "ta": "பாராளுமன்றம்", "bn": "সংসদ"}
+  },
+  "curriculum_frameworks": [
+    {
+      "id": "ncert_guidelines",
+      "title": "NCERT Pedagogical Guidelines",
+      "content": "NCERT recommends that translated educational material maintain the constructivist approach, encouraging critical thinking and inquiry-based learning. Technical terms should use approved regional language equivalents from NCERT glossaries. Mathematical content should preserve universal notation. Science diagrams labels remain bilingual."
+    },
+    {
+      "id": "cbse_translation_policy",
+      "title": "CBSE Language Policy",
+      "content": "CBSE prescribes that translations of examination papers and textbooks follow the medium-specific terminology approved by regional language committees. Difficulty levels (easy, medium, hard) should be preserved through appropriate vocabulary choices. Question stems must maintain the same cognitive demand as the original."
+    },
+    {
+      "id": "ugc_higher_ed",
+      "title": "UGC Higher Education Translation Standards",
+      "content": "UGC mandates that higher education content translated to regional languages maintain academic rigour. Citations and references remain in original script. Technical terminology may be transliterated where no regional equivalent exists. Research methodology terms follow international conventions."
+    },
+    {
+      "id": "nep_2020_multilingual",
+      "title": "NEP 2020 Multilingual Education Framework",
+      "content": "National Education Policy 2020 emphasizes multilingual education with mother tongue instruction. Translations should bridge the gap between home language and academic language. Code-switching between languages is acceptable in explanatory footnotes. Cultural context should be preserved and enriched in translations."
+    }
+  ]
+}

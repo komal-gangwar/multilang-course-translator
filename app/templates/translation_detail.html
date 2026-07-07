@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Translation Detail{% endblock %}
+{% block page_title %}Translation #{{ translation.id }}{% endblock %}
+
+{% block content %}
+<div class="row g-3 fade-in-up">
+
+  <!-- ── Info Card ──────────────────────────────────────────────────────── -->
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-info-circle me-2 text-primary"></i>Translation Info</div>
+      <div class="card-body">
+        <table class="table table-sm mb-0" style="font-size:13px;">
+          <tr>
+            <td class="text-muted" style="width:110px;border:none;padding:5px 0;">Document</td>
+            <td style="border:none;padding:5px 0;font-weight:500;">{{ translation.document.original_filename }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted" style="border:none;padding:5px 0;">Language</td>
+            <td style="border:none;padding:5px 0;">
+              <span class="badge-lang">{{ translation.target_language_name }}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-muted" style="border:none;padding:5px 0;">Domain</td>
+            <td style="border:none;padding:5px 0;">{{ translation.subject_domain }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted" style="border:none;padding:5px 0;">Model</td>
+            <td style="border:none;padding:5px 0;font-size:12px;font-family:'JetBrains Mono',monospace;">{{ translation.model_used or '—' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted" style="border:none;padding:5px 0;">Source Words</td>
+            <td style="border:none;padding:5px 0;">{{ translation.source_word_count }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted" style="border:none;padding:5px 0;">Output Words</td>
+            <td style="border:none;padding:5px 0;">{{ translation.translated_word_count }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted" style="border:none;padding:5px 0;">Duration</td>
+            <td style="border:none;padding:5px 0;">{{ translation.duration_seconds }}s</td>
+          </tr>
+          <tr>
+            <td class="text-muted" style="border:none;padding:5px 0;">RAG Used</td>
+            <td style="border:none;padding:5px 0;">
+              {% if translation.rag_context_used %}
+                <i class="bi bi-check-circle-fill" style="color:var(--ibm-teal);"></i> Yes
+              {% else %}
+                <i class="bi bi-dash-circle" style="color:var(--text-muted-custom);"></i> No
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td class="text-muted" style="border:none;padding:5px 0;">Status</td>
+            <td style="border:none;padding:5px 0;">
+              <span class="status-badge {{ translation.status }}">{{ translation.status }}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-muted" style="border:none;padding:5px 0;">Created</td>
+            <td style="border:none;padding:5px 0;font-size:12px;">
+              {{ translation.created_at.strftime('%d %b %Y, %H:%M') if translation.created_at }}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card">
+      <div class="card-header"><i class="bi bi-gear me-2"></i>Actions</div>
+      <div class="card-body d-flex flex-column gap-2">
+        <button onclick="copyText()" class="btn-ibm justify-content-center" style="padding:10px;">
+          <i class="bi bi-clipboard me-2"></i>Copy Translation
+        </button>
+        <button onclick="downloadText()" class="btn-ghost text-center" style="padding:9px;">
+          <i class="bi bi-download me-2"></i>Download .txt
+        </button>
+        <a href="/translate?doc_id={{ translation.document_id }}" class="btn-ghost text-center" style="padding:9px;">
+          <i class="bi bi-translate me-2"></i>Re-translate
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Translation Text ───────────────────────────────────────────────── -->
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span>
+          <i class="bi bi-file-text me-2 text-primary"></i>
+          Translated Content
+          <span class="badge-lang ms-2">{{ translation.target_language_name }}</span>
+        </span>
+        <div style="font-size:12px;color:var(--text-muted-custom);">
+          {{ translation.translated_word_count }} words
+        </div>
+      </div>
+      <div class="card-body p-0">
+        {% if translation.status == 'completed' and translation.translated_text %}
+        <div class="translation-output" id="translationContent"
+             style="border:none;border-radius:0 0 var(--radius) var(--radius);min-height:500px;">{{ translation.translated_text }}</div>
+        {% elif translation.status == 'error' %}
+        <div class="p-4">
+          <div class="d-flex gap-3 p-4 rounded" style="background:rgba(218,30,40,0.06);border:1px solid rgba(218,30,40,0.2);">
+            <i class="bi bi-x-circle-fill" style="color:#da1e28;font-size:20px;flex-shrink:0;margin-top:2px;"></i>
+            <div>
+              <div class="fw-600 mb-1" style="color:#da1e28;font-weight:600;">Translation Failed</div>
+              <div style="font-size:13px;color:var(--text-muted-custom);">{{ translation.error_message or 'An unknown error occurred.' }}</div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">
+          <i class="bi bi-hourglass-split" style="font-size:32px;opacity:0.4;"></i>
+          <p class="mt-2">Translation is {{ translation.status }}.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function copyText() {
+    const el = document.getElementById('translationContent');
+    if (!el) { showToast('No content to copy.', 'warning'); return; }
+    navigator.clipboard.writeText(el.textContent)
+      .then(() => showToast('Copied to clipboard!', 'success'))
+      .catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = el.textContent;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        showToast('Copied!', 'success');
+      });
+  }
+
+  function downloadText() {
+    const el = document.getElementById('translationContent');
+    if (!el) { showToast('No content to download.', 'warning'); return; }
+    const blob = new Blob([el.textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `translation_{{ translation.id }}_{{ translation.target_language_code }}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Downloaded!', 'info');
+  }
+</script>
+{% endblock %}

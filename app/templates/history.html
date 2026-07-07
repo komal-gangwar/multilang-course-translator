@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Translation History{% endblock %}
+{% block page_title %}<i class="bi bi-clock-history me-2"></i>Translation History{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4 fade-in-up">
+  <!-- Stats row -->
+  {% set completed = translations | selectattr('status', 'equalto', 'completed') | list %}
+  {% set failed = translations | selectattr('status', 'equalto', 'error') | list %}
+  <div class="col-6 col-md-3">
+    <div class="stat-card blue">
+      <div class="stat-icon blue"><i class="bi bi-clock-history"></i></div>
+      <div class="stat-value">{{ translations | length }}</div>
+      <div class="stat-label">Total Translations</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card green">
+      <div class="stat-icon green"><i class="bi bi-check2-circle"></i></div>
+      <div class="stat-value">{{ completed | length }}</div>
+      <div class="stat-label">Completed</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="border-color:rgba(218,30,40,0.2);">
+      <div class="stat-icon" style="background:rgba(218,30,40,0.1);color:#da1e28;"><i class="bi bi-x-circle"></i></div>
+      <div class="stat-value">{{ failed | length }}</div>
+      <div class="stat-label">Failed</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card purple">
+      <div class="stat-icon purple"><i class="bi bi-globe"></i></div>
+      <div class="stat-value">{{ lang_stats | length }}</div>
+      <div class="stat-label">Languages</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- ── History Table ─────────────────────────────────────────────────── -->
+  <div class="col-lg-8 fade-in-up stagger-1">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-table me-2 text-primary"></i>All Translations</span>
+        <div class="d-flex gap-2 align-items-center">
+          <input type="text" id="historySearch" class="form-control" placeholder="Search…"
+                 style="font-size:12px;width:160px;padding:5px 10px;" />
+          <select id="historyFilter" class="form-select" style="font-size:12px;width:120px;padding:5px 10px;">
+            <option value="">All status</option>
+            <option value="completed">Completed</option>
+            <option value="error">Failed</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+      </div>
+      <div class="card-body p-0" style="overflow-x:auto;">
+        {% if translations %}
+        <table class="table table-hover mb-0" id="historyTable">
+          <thead>
+            <tr>
+              <th style="padding:12px 20px;">Document</th>
+              <th>Language</th>
+              <th>Domain</th>
+              <th>Words</th>
+              <th>Duration</th>
+              <th>RAG</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in translations %}
+            <tr class="history-row"
+                data-status="{{ t.status }}"
+                data-search="{{ t.document.original_filename | lower }} {{ t.target_language_name | lower }} {{ t.subject_domain | lower }}">
+              <td style="padding:12px 20px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                <span title="{{ t.document.original_filename }}">{{ t.document.original_filename }}</span>
+              </td>
+              <td>
+                <span class="badge-lang">{{ t.target_language_name }}</span>
+              </td>
+              <td style="font-size:12px;color:var(--text-muted-custom);">{{ t.subject_domain }}</td>
+              <td style="font-size:12px;font-variant-numeric:tabular-nums;">
+                {{ t.translated_word_count | default(0) }}
+              </td>
+              <td style="font-size:12px;color:var(--text-muted-custom);">
+                {% if t.duration_seconds %}{{ t.duration_seconds }}s{% else %}—{% endif %}
+              </td>
+              <td style="text-align:center;">
+                {% if t.rag_context_used %}
+                  <i class="bi bi-database-fill" style="color:var(--ibm-cyan);" title="RAG context used"></i>
+                {% else %}
+                  <span style="color:var(--border-color);">—</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="status-badge {{ t.status }}">{{ t.status }}</span>
+              </td>
+              <td>
+                {% if t.status == 'completed' %}
+                <a href="/translation/{{ t.id }}" class="btn-ghost" style="font-size:12px;padding:3px 10px;">
+                  <i class="bi bi-eye me-1"></i>View
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5" style="color:var(--text-muted-custom);">
+          <i class="bi bi-inbox" style="font-size:36px;opacity:0.4;"></i>
+          <p class="mt-2 mb-3" style="font-size:14px;">No translations yet</p>
+          <a href="/translate" class="btn-ibm" style="font-size:13px;padding:8px 16px;">
+            <i class="bi bi-translate me-1"></i>Start your first translation
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Language Stats ──────────────────────────────────────────────────── -->
+  <div class="col-lg-4 fade-in-up stagger-2">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-pie-chart me-2 text-primary"></i>By Language</div>
+      <div class="card-body">
+        {% if lang_stats %}
+          {% set max_c = lang_stats[0].count %}
+          {% for stat in lang_stats %}
+          <div class="chart-bar-row">
+            <div class="chart-bar-label" title="{{ stat.target_language_name }}">{{ stat.target_language_name }}</div>
+            <div class="chart-bar-track">
+              <div class="chart-bar-fill" style="width:{{ ((stat.count / max_c) * 100) | int }}%;"></div>
+            </div>
+            <div class="chart-bar-count">{{ stat.count }}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="text-center py-3 text-muted" style="font-size:13px;">No data yet</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Search + filter
+  const searchInput = document.getElementById('historySearch');
+  const filterSelect = document.getElementById('historyFilter');
+
+  function filterTable() {
+    const q = searchInput ? searchInput.value.toLowerCase() : '';
+    const status = filterSelect ? filterSelect.value : '';
+    document.querySelectorAll('.history-row').forEach(row => {
+      const matchSearch = !q || row.dataset.search.includes(q);
+      const matchStatus = !status || row.dataset.status === status;
+      row.style.display = matchSearch && matchStatus ? '' : 'none';
+    });
+  }
+
+  if (searchInput) searchInput.addEventListener('input', filterTable);
+  if (filterSelect) filterSelect.addEventListener('change', filterTable);
+</script>
+{% endblock %}

@@ -1,0 +1,420 @@
+{% extends "base.html" %}
+{% block title %}Translate Content{% endblock %}
+{% block page_title %}<i class="bi bi-translate me-2"></i>Translate Content{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+  <!-- ── LEFT PANEL: Upload & Configure ─────────────────────────────────── -->
+  <div class="col-lg-5 fade-in-up">
+
+    <!-- Step 1: Upload Document -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <span class="badge rounded-pill me-2" style="background:var(--ibm-blue);color:#fff;">1</span>
+        Upload Document
+      </div>
+      <div class="card-body">
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept=".pdf,.pptx,.ppt,.docx,.doc,.txt,.md" />
+          <div class="upload-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+          <p class="fw-600 mb-1" style="font-size:15px;font-weight:600;">Drop your file here</p>
+          <p class="text-muted mb-0" style="font-size:13px;">
+            Supports PDF, PPTX, DOCX, TXT, MD · Max 25 MB
+          </p>
+        </div>
+
+        <!-- Upload progress -->
+        <div id="uploadProgress" class="mt-3" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <small id="uploadFileName" class="text-muted"></small>
+            <small id="uploadPercent" class="text-muted">0%</small>
+          </div>
+          <div class="progress" style="height:6px;border-radius:3px;">
+            <div id="uploadBar" class="progress-bar" style="width:0%;background:var(--ibm-blue);transition:width 0.3s;"></div>
+          </div>
+        </div>
+
+        <!-- Uploaded document info -->
+        <div id="docInfo" class="mt-3" style="display:none;">
+          <div class="d-flex align-items-start gap-3 p-3 rounded" style="background:var(--bg-primary);border:1px solid var(--border-color);">
+            <div style="font-size:28px;" id="docIcon">📄</div>
+            <div style="min-width:0;flex:1;">
+              <div class="fw-600" id="docName" style="font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+              <div class="text-muted" id="docMeta" style="font-size:12px;margin-top:2px;"></div>
+              <div id="docPreview" style="font-size:12px;margin-top:6px;line-height:1.5;color:var(--text-muted-custom);max-height:60px;overflow:hidden;"></div>
+            </div>
+            <button class="btn-ghost" onclick="resetUpload()" style="padding:4px 8px;font-size:12px;flex-shrink:0;">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Select Language -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <span class="badge rounded-pill me-2" style="background:var(--ibm-blue);color:#fff;">2</span>
+        Select Target Language
+      </div>
+      <div class="card-body">
+        <!-- Search -->
+        <input type="text" id="langSearch" class="form-control mb-3"
+               placeholder="🔍  Search language…" style="font-size:13px;" />
+
+        <!-- Language grid -->
+        <div id="langGrid" class="row g-2" style="max-height:280px;overflow-y:auto;padding-right:4px;">
+          {% for lang in languages %}
+          <div class="col-4">
+            <div class="lang-card" data-code="{{ lang.code }}" data-name="{{ lang.name }}"
+                 onclick="selectLanguage('{{ lang.code }}', '{{ lang.name }}', this)">
+              <div class="lang-flag">{{ lang.flag }}</div>
+              <div class="lang-name">{{ lang.name }}</div>
+              <div class="lang-native">{{ lang.native }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div id="selectedLang" class="mt-3" style="display:none;">
+          <div class="d-flex align-items-center gap-2 p-2 rounded" style="background:rgba(15,98,254,0.08);border:1px solid rgba(15,98,254,0.2);">
+            <i class="bi bi-check-circle-fill text-primary"></i>
+            <span style="font-size:13px;font-weight:600;" id="selectedLangText"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Subject Domain -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <span class="badge rounded-pill me-2" style="background:var(--ibm-blue);color:#fff;">3</span>
+        Subject Domain
+      </div>
+      <div class="card-body">
+        <select id="subjectDomain" class="form-select" style="font-size:13.5px;">
+          {% for subject in subjects %}
+          <option value="{{ subject.key }}">{{ subject.label }}</option>
+          {% endfor %}
+        </select>
+        <small class="text-muted mt-1 d-block" style="font-size:12px;">
+          <i class="bi bi-info-circle me-1"></i>
+          Choosing the right domain enables subject-specific RAG context retrieval.
+        </small>
+      </div>
+    </div>
+
+    <!-- Translate Button -->
+    <button id="translateBtn" class="btn-ibm w-100" style="padding:14px;font-size:15px;border-radius:var(--radius);" onclick="startTranslation()" disabled>
+      <i class="bi bi-translate me-2"></i> Translate with Watsonx
+    </button>
+
+    <!-- RAG info -->
+    <div class="mt-3 p-3 rounded" style="background:var(--bg-primary);border:1px solid var(--border-color);font-size:12px;color:var(--text-muted-custom);">
+      <i class="bi bi-database-fill me-1" style="color:var(--ibm-cyan);"></i>
+      <strong>RAG Active:</strong> Glossaries (NCERT, CBSE, UGC) + Curriculum Frameworks are
+      retrieved and injected into the translation context automatically.
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL: Translation Output ────────────────────────────────── -->
+  <div class="col-lg-7 fade-in-up stagger-2">
+    <div class="card h-100" style="min-height:600px;">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-file-text me-2 text-primary"></i>Translation Output</span>
+        <div class="d-flex gap-2" id="outputActions" style="display:none!important;">
+          <button class="btn-ghost" onclick="copyTranslation()" style="font-size:12px;padding:4px 10px;">
+            <i class="bi bi-clipboard me-1"></i>Copy
+          </button>
+          <button class="btn-ghost" onclick="downloadTranslation()" style="font-size:12px;padding:4px 10px;">
+            <i class="bi bi-download me-1"></i>Download
+          </button>
+        </div>
+      </div>
+      <div class="card-body d-flex flex-column" style="padding:0;">
+
+        <!-- Empty state -->
+        <div id="emptyOutput" class="d-flex flex-column align-items-center justify-content-center flex-1 py-5" style="flex:1;text-align:center;color:var(--text-muted-custom);">
+          <i class="bi bi-translate" style="font-size:52px;opacity:0.2;margin-bottom:16px;"></i>
+          <p style="font-size:15px;font-weight:500;margin-bottom:6px;">Ready to translate</p>
+          <p style="font-size:13px;max-width:280px;margin:0;">
+            Upload a document, select a target language and subject domain, then click
+            <strong>Translate</strong>.
+          </p>
+        </div>
+
+        <!-- Loading state -->
+        <div id="loadingOutput" class="translating-loader" style="display:none;flex:1;">
+          <div class="loader-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <p style="font-size:14px;font-weight:500;margin:0;">Translating with IBM Watsonx Granite…</p>
+          <p class="text-muted" style="font-size:12px;margin:0;">Retrieving RAG context · Calling model · Streaming response</p>
+          <div class="mt-3 w-100" style="max-width:320px;">
+            <div class="progress" style="height:4px;border-radius:2px;">
+              <div class="progress-bar progress-bar-striped progress-bar-animated"
+                   style="width:100%;background:var(--ibm-blue);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Translation result -->
+        <div id="translationResult" style="display:none;flex:1;display:flex;flex-direction:column;">
+          <!-- Meta bar -->
+          <div id="translationMeta" class="d-flex align-items-center gap-3 px-4 py-3 flex-wrap"
+               style="border-bottom:1px solid var(--border-color);font-size:12px;color:var(--text-muted-custom);">
+          </div>
+          <!-- Text output -->
+          <div class="translation-output flex-1" id="translationText" style="margin:0;border:none;border-radius:0;flex:1;overflow-y:auto;"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ── State ────────────────────────────────────────────────────────────────
+  let uploadedDocId = null;
+  let selectedLangCode = null;
+  let selectedLangName = null;
+  let translationText = '';
+
+  // Pre-select from URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const preDocId = urlParams.get('doc_id');
+  const preLang = urlParams.get('lang');
+
+  if (preLang) {
+    const card = document.querySelector(`[data-code="${preLang}"]`);
+    if (card) selectLanguage(preLang, card.dataset.name, card);
+  }
+
+  if (preDocId) {
+    // Load doc info from API
+    fetch(`/api/documents`)
+      .then(r => r.json())
+      .then(data => {
+        const doc = data.documents.find(d => d.id == preDocId);
+        if (doc) {
+          uploadedDocId = doc.id;
+          showDocInfo(doc.original_filename, doc.file_type, doc.file_size, doc.word_count, doc.page_count, '');
+        }
+      });
+  }
+
+  // ── Upload Zone ──────────────────────────────────────────────────────────
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput  = document.getElementById('fileInput');
+
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+  function handleFile(file) {
+    const allowed = ['pdf','pptx','ppt','docx','doc','txt','md'];
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!allowed.includes(ext)) {
+      showToast('Unsupported file type: .' + ext, 'error');
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      showToast('File exceeds 25 MB limit.', 'error');
+      return;
+    }
+    uploadFile(file);
+  }
+
+  function uploadFile(file) {
+    const progressEl = document.getElementById('uploadProgress');
+    const barEl = document.getElementById('uploadBar');
+    const percentEl = document.getElementById('uploadPercent');
+    const fileNameEl = document.getElementById('uploadFileName');
+
+    progressEl.style.display = 'block';
+    fileNameEl.textContent = file.name;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('subject_domain', document.getElementById('subjectDomain').value);
+
+    // Simulate progress while uploading
+    let fakeProgress = 0;
+    const fakeInterval = setInterval(() => {
+      fakeProgress = Math.min(fakeProgress + Math.random() * 15, 85);
+      barEl.style.width = fakeProgress + '%';
+      percentEl.textContent = Math.round(fakeProgress) + '%';
+    }, 200);
+
+    fetch('/api/upload', { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(data => {
+        clearInterval(fakeInterval);
+        barEl.style.width = '100%';
+        percentEl.textContent = '100%';
+        setTimeout(() => { progressEl.style.display = 'none'; }, 600);
+
+        if (data.success) {
+          const doc = data.document;
+          uploadedDocId = doc.id;
+          showDocInfo(doc.original_filename, doc.file_type, doc.file_size, doc.word_count, doc.page_count, data.preview || '');
+          showToast('Document uploaded and indexed!', 'success');
+          updateBtn();
+        } else {
+          showToast(data.error || 'Upload failed.', 'error');
+        }
+      })
+      .catch(e => {
+        clearInterval(fakeInterval);
+        progressEl.style.display = 'none';
+        showToast('Upload error: ' + e.message, 'error');
+      });
+  }
+
+  function showDocInfo(name, type, size, words, pages, previewText) {
+    const icons = { pdf: '📄', presentation: '📊', document: '📝', text: '📃' };
+    document.getElementById('docIcon').textContent = icons[type] || '📃';
+    document.getElementById('docName').textContent = name;
+    document.getElementById('docMeta').textContent = `${formatBytes(size)} · ${words} words · ${pages} ${type === 'presentation' ? 'slides' : 'pages'}`;
+    document.getElementById('docPreview').textContent = previewText;
+    document.getElementById('docInfo').style.display = 'block';
+    uploadZone.style.display = 'none';
+    updateBtn();
+  }
+
+  function resetUpload() {
+    uploadedDocId = null;
+    document.getElementById('docInfo').style.display = 'none';
+    uploadZone.style.display = 'block';
+    fileInput.value = '';
+    updateBtn();
+  }
+
+  // ── Language Selection ────────────────────────────────────────────────────
+  function selectLanguage(code, name, cardEl) {
+    selectedLangCode = code;
+    selectedLangName = name;
+    document.querySelectorAll('.lang-card').forEach(c => c.classList.remove('selected'));
+    cardEl.classList.add('selected');
+    const selectedDiv = document.getElementById('selectedLang');
+    document.getElementById('selectedLangText').textContent = '✓ ' + name + ' selected';
+    selectedDiv.style.display = 'block';
+    updateBtn();
+  }
+
+  // Language search
+  document.getElementById('langSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#langGrid .col-4').forEach(col => {
+      const card = col.querySelector('.lang-card');
+      const name = card.dataset.name.toLowerCase();
+      col.style.display = name.includes(q) ? '' : 'none';
+    });
+  });
+
+  // ── Translate Button State ─────────────────────────────────────────────────
+  function updateBtn() {
+    const btn = document.getElementById('translateBtn');
+    btn.disabled = !(uploadedDocId && selectedLangCode);
+  }
+
+  // ── Translation ────────────────────────────────────────────────────────────
+  function startTranslation() {
+    if (!uploadedDocId || !selectedLangCode) return;
+
+    document.getElementById('emptyOutput').style.display = 'none';
+    document.getElementById('translationResult').style.display = 'none';
+    document.getElementById('loadingOutput').style.display = 'flex';
+    document.getElementById('translateBtn').disabled = true;
+    document.getElementById('outputActions').style.display = 'none';
+
+    const payload = {
+      document_id: uploadedDocId,
+      target_language_code: selectedLangCode,
+      target_language_name: selectedLangName,
+      subject_domain: document.getElementById('subjectDomain').value,
+    };
+
+    const startTime = Date.now();
+
+    fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('loadingOutput').style.display = 'none';
+      document.getElementById('translateBtn').disabled = false;
+
+      if (data.success) {
+        const t = data.translation;
+        translationText = data.translated_text || '';
+
+        // Meta bar
+        document.getElementById('translationMeta').innerHTML = `
+          <span class="badge-lang"><i class="bi bi-translate me-1"></i>${t.target_language_name}</span>
+          <span><i class="bi bi-file-word me-1"></i>${t.translated_word_count} words</span>
+          <span><i class="bi bi-clock me-1"></i>${t.duration_seconds}s</span>
+          ${t.rag_context_used ? '<span style="color:var(--ibm-cyan);"><i class="bi bi-database me-1"></i>RAG context used</span>' : ''}
+          <span class="status-badge completed">Completed</span>
+        `;
+
+        // Text output — preserve line breaks
+        const textEl = document.getElementById('translationText');
+        textEl.textContent = translationText;
+
+        document.getElementById('translationResult').style.display = 'flex';
+        document.getElementById('outputActions').style.display = 'flex';
+        showToast('Translation completed in ' + t.duration_seconds + 's!', 'success');
+      } else {
+        document.getElementById('emptyOutput').style.display = 'flex';
+        showToast(data.error || 'Translation failed.', 'error');
+      }
+    })
+    .catch(e => {
+      document.getElementById('loadingOutput').style.display = 'none';
+      document.getElementById('emptyOutput').style.display = 'flex';
+      document.getElementById('translateBtn').disabled = false;
+      showToast('Request failed: ' + e.message, 'error');
+    });
+  }
+
+  // ── Copy & Download ────────────────────────────────────────────────────────
+  function copyTranslation() {
+    if (!translationText) return;
+    navigator.clipboard.writeText(translationText)
+      .then(() => showToast('Translation copied to clipboard!', 'success'))
+      .catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = translationText;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        showToast('Copied!', 'success');
+      });
+  }
+
+  function downloadTranslation() {
+    if (!translationText) return;
+    const blob = new Blob([translationText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `translation_${selectedLangCode}_${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Translation downloaded!', 'info');
+  }
+</script>
+{% endblock %}

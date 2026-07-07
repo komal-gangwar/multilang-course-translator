@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="fade-in-up">
+
+  <!-- ── Welcome Banner ─────────────────────────────────────────────────── -->
+  <div class="card mb-4 border-0" style="background: linear-gradient(135deg, #0f62fe 0%, #0530ad 100%); color: #fff; overflow: hidden; position: relative;">
+    <div style="position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,0.06);border-radius:50%;"></div>
+    <div style="position:absolute;right:60px;bottom:-60px;width:150px;height:150px;background:rgba(255,255,255,0.04);border-radius:50%;"></div>
+    <div class="card-body p-4">
+      <div class="d-flex align-items-start gap-3">
+        <div style="font-size:40px;">🌐</div>
+        <div>
+          <h4 class="fw-bold mb-1" style="color:#fff;">Multi-language Course Content Translator</h4>
+          <p class="mb-3" style="color:rgba(255,255,255,0.75);font-size:14px;max-width:560px;">
+            Powered by <strong>IBM Watsonx.ai Granite</strong> with RAG-enhanced translation.
+            Upload your PDFs, presentations, or notes and translate them into 17+ regional
+            and international languages while preserving educational accuracy.
+          </p>
+          <div class="d-flex gap-2 flex-wrap">
+            <a href="/translate" class="btn btn-light btn-sm fw-600" style="font-weight:600;">
+              <i class="bi bi-translate me-1"></i> Start Translating
+            </a>
+            <a href="/documents" class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);">
+              <i class="bi bi-folder2-open me-1"></i> View Documents
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Stat Cards ─────────────────────────────────────────────────────── -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3 fade-in-up stagger-1">
+      <div class="stat-card blue">
+        <div class="stat-icon blue"><i class="bi bi-file-earmark-text-fill"></i></div>
+        <div class="stat-value" id="statDocs">{{ total_docs }}</div>
+        <div class="stat-label">Documents Uploaded</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 fade-in-up stagger-2">
+      <div class="stat-card cyan">
+        <div class="stat-icon cyan"><i class="bi bi-translate"></i></div>
+        <div class="stat-value" id="statTranslations">{{ total_translations }}</div>
+        <div class="stat-label">Translations Done</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 fade-in-up stagger-3">
+      <div class="stat-card green">
+        <div class="stat-icon green"><i class="bi bi-globe-asia-australia"></i></div>
+        <div class="stat-value" id="statLangs">{{ lang_stats | length }}</div>
+        <div class="stat-label">Languages Used</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 fade-in-up stagger-4">
+      <div class="stat-card purple">
+        <div class="stat-icon purple"><i class="bi bi-cpu-fill"></i></div>
+        <div class="stat-value" style="font-size:20px;">Granite</div>
+        <div class="stat-label">AI Model Active</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- ── Recent Documents ────────────────────────────────────────────── -->
+    <div class="col-lg-7 fade-in-up stagger-2">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <span><i class="bi bi-file-earmark-text me-2 text-primary"></i>Recent Documents</span>
+          <a href="/documents" class="btn-ghost" style="font-size:12px;padding:4px 10px;">View All</a>
+        </div>
+        <div class="card-body p-0">
+          {% if recent_docs %}
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th style="padding:12px 20px;">Filename</th>
+                <th>Type</th>
+                <th>Words</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for doc in recent_docs %}
+              <tr>
+                <td style="padding:12px 20px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                  <span title="{{ doc.original_filename }}">
+                    {% if doc.file_type == 'pdf' %}📄
+                    {% elif doc.file_type == 'presentation' %}📊
+                    {% elif doc.file_type == 'document' %}📝
+                    {% else %}📃{% endif %}
+                    {{ doc.original_filename }}
+                  </span>
+                </td>
+                <td><span class="badge-lang">{{ doc.file_type }}</span></td>
+                <td>{{ doc.word_count | default(0) }}</td>
+                <td>
+                  <span class="status-badge {{ doc.status }}">{{ doc.status }}</span>
+                </td>
+                <td>
+                  <a href="/translate?doc_id={{ doc.id }}" class="btn-ghost" style="font-size:12px;padding:3px 10px;">
+                    Translate
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="text-center py-5" style="color:var(--text-muted-custom);">
+            <i class="bi bi-inbox" style="font-size:36px;opacity:0.4;"></i>
+            <p class="mt-2 mb-3" style="font-size:14px;">No documents yet</p>
+            <a href="/translate" class="btn-ibm" style="font-size:13px;padding:8px 16px;">Upload your first document</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Language Usage Chart ────────────────────────────────────────── -->
+    <div class="col-lg-5 fade-in-up stagger-3">
+      <div class="card h-100">
+        <div class="card-header">
+          <i class="bi bi-bar-chart me-2 text-primary"></i>Language Usage
+        </div>
+        <div class="card-body">
+          {% if lang_stats %}
+            {% set max_count = lang_stats[0].count %}
+            {% for stat in lang_stats %}
+            <div class="chart-bar-row">
+              <div class="chart-bar-label" title="{{ stat.target_language_name }}">
+                {{ stat.target_language_name }}
+              </div>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill"
+                     style="width: {{ ((stat.count / max_count) * 100) | int }}%;"
+                     data-target="{{ ((stat.count / max_count) * 100) | int }}">
+                </div>
+              </div>
+              <div class="chart-bar-count">{{ stat.count }}</div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="text-center py-4" style="color:var(--text-muted-custom);">
+            <i class="bi bi-bar-chart" style="font-size:32px;opacity:0.3;"></i>
+            <p class="mt-2" style="font-size:13px;">No translation data yet</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Supported Languages Grid ───────────────────────────────────── -->
+    <div class="col-12 fade-in-up stagger-4">
+      <div class="card">
+        <div class="card-header">
+          <i class="bi bi-globe me-2 text-primary"></i>Supported Languages
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-2">
+            {% for lang in languages %}
+            <a href="/translate?lang={{ lang.code }}"
+               class="badge-lang text-decoration-none"
+               style="padding:6px 12px;">
+              {{ lang.flag }} {{ lang.name }}
+              <span style="opacity:0.6;margin-left:3px;">({{ lang.native }})</span>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Quick Actions ─────────────────────────────────────────────────── -->
+    <div class="col-12 fade-in-up">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-lightning-fill me-2" style="color:var(--ibm-yellow);"></i>Quick Actions</div>
+        <div class="card-body d-flex gap-3 flex-wrap">
+          <a href="/translate" class="btn-ibm">
+            <i class="bi bi-translate"></i> New Translation
+          </a>
+          <a href="/documents" class="btn-ghost">
+            <i class="bi bi-folder2-open me-1"></i> Browse Documents
+          </a>
+          <a href="/history" class="btn-ghost">
+            <i class="bi bi-clock-history me-1"></i> View History
+          </a>
+          <button class="btn-ghost" onclick="testConnection()">
+            <i class="bi bi-plug me-1"></i> Test Watsonx Connection
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function testConnection() {
+    showToast('Testing IBM Watsonx connection…', 'info');
+    fetch('/api/test-connection')
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'connected') {
+          showToast('✓ Connected to IBM Watsonx.ai', 'success');
+        } else {
+          showToast('Connection failed: ' + (data.error || 'unknown error'), 'error');
+        }
+      })
+      .catch(() => showToast('Could not reach the API.', 'error'));
+  }
+
+  // Animate stat counters
+  document.querySelectorAll('.stat-value').forEach(el => {
+    const target = parseInt(el.textContent);
+    if (!isNaN(target) && target > 0) {
+      let current = 0;
+      const increment = Math.ceil(target / 30);
+      const timer = setInterval(() => {
+        current = Math.min(current + increment, target);
+        el.textContent = current;
+        if (current >= target) clearInterval(timer);
+      }, 40);
+    }
+  });
+
+  // Animate chart bars (already set via inline style, just ensure 0 → target)
+  document.querySelectorAll('.chart-bar-fill').forEach(el => {
+    const target = el.getAttribute('data-target');
+    el.style.width = '0%';
+    setTimeout(() => { el.style.width = target + '%'; }, 100);
+  });
+</script>
+{% endblock %}

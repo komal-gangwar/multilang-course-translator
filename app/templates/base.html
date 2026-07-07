@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Translator Agent{% endblock %} — IBM Watsonx</title>
+
+  <!-- Bootstrap 5.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       CSS VARIABLES & THEMING
+    ═══════════════════════════════════════════════════════════ */
+    :root {
+      --ibm-blue: #0f62fe;
+      --ibm-blue-dark: #0043ce;
+      --ibm-cyan: #1192e8;
+      --ibm-teal: #007d79;
+      --ibm-purple: #8a3ffc;
+      --ibm-green: #198038;
+      --ibm-yellow: #f1c21b;
+      --ibm-red: #da1e28;
+      --ibm-cool-gray-10: #f2f4f8;
+      --ibm-cool-gray-20: #dde1e7;
+      --ibm-cool-gray-90: #21272a;
+      --ibm-cool-gray-100: #121619;
+      --sidebar-width: 260px;
+      --topbar-height: 64px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    [data-bs-theme="dark"] {
+      --bg-primary: #13171a;
+      --bg-secondary: #1c2126;
+      --bg-card: #20272d;
+      --bg-sidebar: #161b20;
+      --border-color: #2e3c43;
+      --text-muted-custom: #8da0ad;
+      --shadow: 0 2px 12px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    [data-bs-theme="light"] {
+      --bg-primary: #f0f4f8;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-sidebar: #161b20;
+      --border-color: #dde1e7;
+      --text-muted-custom: #697077;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BASE
+    ═══════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.3s ease;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════════════════ */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--bg-sidebar);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .sidebar-brand {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-brand .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: var(--ibm-blue);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .brand-text .brand-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
+
+    .brand-text .brand-sub {
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-nav {
+      padding: 12px 0;
+      flex: 1;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 16px 20px 6px;
+    }
+
+    .sidebar-nav .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: rgba(255,255,255,0.6);
+      font-size: 13.5px;
+      font-weight: 450;
+      text-decoration: none;
+      border-radius: 0;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .sidebar-nav .nav-link i {
+      font-size: 16px;
+      width: 20px;
+      flex-shrink: 0;
+      opacity: 0.8;
+    }
+
+    .sidebar-nav .nav-link:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .sidebar-nav .nav-link.active {
+      color: #fff;
+      background: rgba(15,98,254,0.2);
+      font-weight: 600;
+    }
+
+    .sidebar-nav .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--ibm-blue);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .ibm-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .ibm-badge .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #24a148;
+      animation: pulse-dot 2s infinite;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       TOP BAR
+    ═══════════════════════════════════════════════════════════ */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: var(--topbar-height);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      transition: background 0.3s ease;
+    }
+
+    .topbar-title {
+      font-size: 16px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════════════════════ */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      margin-top: var(--topbar-height);
+      padding: 28px;
+      min-height: calc(100vh - var(--topbar-height));
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .card:hover { box-shadow: var(--shadow-lg); }
+
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 20px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       STAT CARDS
+    ═══════════════════════════════════════════════════════════ */
+    .stat-card {
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      transform: translate(30px, -30px);
+      opacity: 0.12;
+    }
+
+    .stat-card.blue::after  { background: var(--ibm-blue); }
+    .stat-card.cyan::after  { background: var(--ibm-cyan); }
+    .stat-card.green::after { background: var(--ibm-green); }
+    .stat-card.purple::after{ background: var(--ibm-purple); }
+
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .stat-icon.blue   { background: rgba(15,98,254,0.12); color: var(--ibm-blue); }
+    .stat-icon.cyan   { background: rgba(17,146,232,0.12); color: var(--ibm-cyan); }
+    .stat-icon.green  { background: rgba(25,128,56,0.12); color: var(--ibm-green); }
+    .stat-icon.purple { background: rgba(138,63,252,0.12); color: var(--ibm-purple); }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted-custom);
+      font-weight: 450;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════════════════════ */
+    .btn-ibm {
+      background: var(--ibm-blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-ibm:hover {
+      background: var(--ibm-blue-dark);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .btn-ibm:active { transform: translateY(0); }
+
+    .btn-ibm:disabled {
+      background: #8d9094;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: inherit;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      transition: var(--transition);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-primary);
+      border-color: var(--ibm-blue);
+      color: var(--ibm-blue);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BADGES
+    ═══════════════════════════════════════════════════════════ */
+    .badge-lang {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 500;
+      background: rgba(15,98,254,0.1);
+      color: var(--ibm-blue);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status-badge.completed { background: rgba(25,128,56,0.12); color: #198038; }
+    .status-badge.error     { background: rgba(218,30,40,0.12); color: #da1e28; }
+    .status-badge.pending   { background: rgba(241,194,27,0.12); color: #9b7200; }
+    .status-badge.indexed   { background: rgba(17,146,232,0.12); color: #1192e8; }
+
+    /* ═══════════════════════════════════════════════════════════
+       UPLOAD ZONE
+    ═══════════════════════════════════════════════════════════ */
+    .upload-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius);
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--bg-primary);
+      position: relative;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--ibm-blue);
+      background: rgba(15,98,254,0.04);
+    }
+
+    .upload-zone .upload-icon {
+      font-size: 48px;
+      color: var(--ibm-blue);
+      opacity: 0.6;
+      margin-bottom: 16px;
+      transition: var(--transition);
+    }
+
+    .upload-zone:hover .upload-icon { opacity: 1; transform: scale(1.05); }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       TRANSLATION OUTPUT
+    ═══════════════════════════════════════════════════════════ */
+    .translation-output {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      min-height: 200px;
+      font-size: 14.5px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       PROGRESS / LOADER
+    ═══════════════════════════════════════════════════════════ */
+    .translating-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 40px;
+    }
+
+    .loader-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .loader-dots span {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--ibm-blue);
+      animation: bounce-dot 1.4s infinite ease-in-out;
+    }
+
+    .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    /* ═══════════════════════════════════════════════════════════
+       TABLES
+    ═══════════════════════════════════════════════════════════ */
+    .table th {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted-custom);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .table td {
+      font-size: 13.5px;
+      vertical-align: middle;
+      border-color: var(--border-color);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LANGUAGE CARDS (select grid)
+    ═══════════════════════════════════════════════════════════ */
+    .lang-card {
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .lang-card:hover {
+      border-color: var(--ibm-blue);
+      background: rgba(15,98,254,0.04);
+    }
+
+    .lang-card.selected {
+      border-color: var(--ibm-blue);
+      background: rgba(15,98,254,0.1);
+    }
+
+    .lang-card .lang-flag  { font-size: 22px; margin-bottom: 4px; }
+    .lang-card .lang-name  { font-size: 12px; font-weight: 600; }
+    .lang-card .lang-native{ font-size: 11px; color: var(--text-muted-custom); }
+
+    /* ═══════════════════════════════════════════════════════════
+       CHART BAR
+    ═══════════════════════════════════════════════════════════ */
+    .chart-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .chart-bar-label {
+      width: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: right;
+      flex-shrink: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chart-bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .chart-bar-fill {
+      height: 100%;
+      background: var(--ibm-blue);
+      border-radius: 4px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chart-bar-count {
+      font-size: 12px;
+      color: var(--text-muted-custom);
+      font-variant-numeric: tabular-nums;
+      width: 28px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+    ═══════════════════════════════════════════════════════════ */
+    .toast-container-custom {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast-custom {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 500;
+      max-width: 360px;
+      color: #fff;
+      box-shadow: var(--shadow-lg);
+      animation: slide-in-right 0.3s ease;
+    }
+
+    .toast-custom.success { background: #198038; }
+    .toast-custom.error   { background: #da1e28; }
+    .toast-custom.info    { background: #1192e8; }
+    .toast-custom.warning { background: #9b7200; }
+
+    /* ═══════════════════════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════════════════════ */
+    @keyframes bounce-dot {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+      40%            { transform: scale(1.1); opacity: 1; }
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    @keyframes slide-in-right {
+      from { transform: translateX(100%); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    @keyframes fade-in-up {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .fade-in-up {
+      animation: fade-in-up 0.4s ease both;
+    }
+
+    .stagger-1 { animation-delay: 0.05s; }
+    .stagger-2 { animation-delay: 0.10s; }
+    .stagger-3 { animation-delay: 0.15s; }
+    .stagger-4 { animation-delay: 0.20s; }
+
+    /* ═══════════════════════════════════════════════════════════
+       FORMS
+    ═══════════════════════════════════════════════════════════ */
+    .form-control, .form-select {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--ibm-blue);
+      box-shadow: 0 0 0 3px rgba(15,98,254,0.15);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE / RESPONSIVE
+    ═══════════════════════════════════════════════════════════ */
+    .sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      padding: 4px 8px;
+      color: inherit;
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+        z-index: 1100;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-toggle { display: flex; align-items: center; }
+      .sidebar-backdrop.visible { display: block; }
+      .topbar { left: 0; }
+      .main-content { margin-left: 0; padding: 16px; }
+    }
+
+    @media (max-width: 576px) {
+      .stat-value { font-size: 24px; }
+      .main-content { padding: 12px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       DARK MODE OVERRIDES
+    ═══════════════════════════════════════════════════════════ */
+    [data-bs-theme="dark"] .table { --bs-table-bg: transparent; }
+    [data-bs-theme="dark"] .form-control,
+    [data-bs-theme="dark"] .form-select {
+      background: var(--bg-card);
+      border-color: var(--border-color);
+      color: #e0e8ef;
+    }
+
+    [data-bs-theme="dark"] .form-control::placeholder { color: #566370; }
+
+    /* ═══════════════════════════════════════════════════════════
+       CODE BLOCKS
+    ═══════════════════════════════════════════════════════════ */
+    pre, code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SCROLLBAR
+    ═══════════════════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #8d9094; }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">🌐</div>
+        <div class="brand-text">
+          <div class="brand-title">Translator Agent</div>
+          <div class="brand-sub">IBM Watsonx · Granite</div>
+        </div>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Navigation</div>
+
+      <a href="/" class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+      </a>
+      <a href="/translate" class="nav-link {% if request.endpoint == 'main.translate_page' %}active{% endif %}">
+        <i class="bi bi-translate"></i> Translate Content
+      </a>
+      <a href="/documents" class="nav-link {% if request.endpoint == 'main.documents_page' %}active{% endif %}">
+        <i class="bi bi-folder2-open"></i> Documents
+      </a>
+      <a href="/history" class="nav-link {% if request.endpoint == 'main.history_page' %}active{% endif %}">
+        <i class="bi bi-clock-history"></i> Translation History
+      </a>
+
+      <div class="nav-section-label" style="margin-top:8px;">Resources</div>
+      <a href="/api/test-connection" target="_blank" class="nav-link">
+        <i class="bi bi-plug-fill"></i> API Status
+      </a>
+      <a href="/api/stats" target="_blank" class="nav-link">
+        <i class="bi bi-bar-chart-fill"></i> Raw Stats
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="ibm-badge">
+        <div class="badge-dot"></div>
+        <span>IBM Watsonx.ai Connected</span>
+      </div>
+      <div style="margin-top:8px; font-size:11px; color:rgba(255,255,255,0.25);">
+        Granite · RAG · Multilingual
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Sidebar Backdrop (mobile) ───────────────────────────────────────── -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- ── Top Bar ────────────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+      <i class="bi bi-list"></i>
+    </button>
+    <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+    <div class="topbar-actions">
+      <a href="/translate" class="btn-ibm d-none d-sm-inline-flex" style="padding:7px 14px;font-size:13px;">
+        <i class="bi bi-plus-lg"></i> New Translation
+      </a>
+      <!-- Dark mode toggle -->
+      <button class="btn-ghost" id="themeToggle" style="padding:7px 10px;font-size:16px;" title="Toggle dark mode">
+        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Main Content ───────────────────────────────────────────────────── -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ── Toast Container ───────────────────────────────────────────────── -->
+  <div class="toast-container-custom" id="toastContainer"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ── Dark Mode ────────────────────────────────────────────────────────
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    function applyTheme(theme) {
+      html.setAttribute('data-bs-theme', theme);
+      localStorage.setItem('theme', theme);
+      themeIcon.className = theme === 'dark'
+        ? 'bi bi-sun-fill'
+        : 'bi bi-moon-stars-fill';
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+      const current = html.getAttribute('data-bs-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    // ── Sidebar Toggle (mobile) ───────────────────────────────────────────
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('visible');
+    });
+
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('visible');
+    });
+
+    // ── Toast Helper ─────────────────────────────────────────────────────
+    function showToast(message, type = 'info', duration = 4000) {
+      const icons = { success: 'bi-check-circle-fill', error: 'bi-x-circle-fill', info: 'bi-info-circle-fill', warning: 'bi-exclamation-triangle-fill' };
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast-custom ${type}`;
+      toast.innerHTML = `<i class="bi ${icons[type] || icons.info}"></i><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    // ── Format file size ─────────────────────────────────────────────────
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    // ── Relative time ─────────────────────────────────────────────────────
+    function timeAgo(dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000);
+      if (diff < 60) return 'just now';
+      if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+      return `${Math.floor(diff/86400)}d ago`;
+    }
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
