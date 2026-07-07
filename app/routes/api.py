@@ -179,7 +179,7 @@ def translate_document():
         target_language_code=target_lang_code,
         target_language_name=target_lang_name,
         subject_domain=subject_domain,
-        model_used=os.getenv("TRANSLATION_MODEL", "ibm/granite-3-3-8b-instruct"),
+        model_used=os.getenv("TRANSLATION_MODEL", "ibm/granite-3-1-8b-base"),
         source_word_count=word_count(source_text),
         rag_context_used=rag_used,
         status="pending",

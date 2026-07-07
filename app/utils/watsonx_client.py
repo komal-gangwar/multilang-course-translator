@@ -17,11 +17,11 @@ _watsonx_client = None
 # Update this list if your Watsonx project gains / loses model access.
 # The first entry is the default used when TRANSLATION_MODEL is not set in .env.
 SUPPORTED_TRANSLATION_MODELS = [
-    "meta-llama/llama-3-3-70b-instruct",   # best quality — default
+    "ibm/granite-3-1-8b-base",             # IBM Granite (base, not instruct) — default
+    "meta-llama/llama-3-3-70b-instruct",
     "meta-llama/llama-3-1-8b",
     "meta-llama/llama-3-3-70b-gptq",
     "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-    "ibm/granite-3-1-8b-base",             # IBM Granite (base, not instruct)
     "ibm/granite-4-h-small",
     "ibm/granite-8b-code-instruct",
     "mistralai/mistral-large-2512",
