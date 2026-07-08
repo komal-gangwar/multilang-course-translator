@@ -1,0 +1,41 @@
+﻿subject,term,hi,mr,ta,bn
+mathematics,derivative,अवकलज,अवकलज,வகைக்கெழு,অবকল
+mathematics,integral,समाकलन,समाकलन,தொகை,সমাকল
+mathematics,matrix,आव्यूह,मॅट्रिक्स,அணி,ম্যাট্রিক্স
+mathematics,probability,प्रायिकता,संभाव्यता,நிகழ்தகவு,সম্ভাবনা
+mathematics,function,फलन,फलन,சார்பு,ফাংশন
+mathematics,vector,सदिश,सदिश,திசையன்,ভেক্টর
+mathematics,theorem,प्रमेय,प्रमेय,தேற்றம்,উপপাদ্য
+mathematics,equation,समीकरण,समीकरण,சமன்பாடு,সমীকরণ
+mathematics,geometry,ज्यामिति,भूमिती,வடிவியல்,জ্যামিতি
+mathematics,algebra,बीजगणित,बीजगणित,இயற்கணிதம்,বীজগণিত
+science,photosynthesis,प्रकाश संश्लेषण,प्रकाश संश्लेषण,ஒளிச்சேர்க்கை,সালোকসংশ্লেষণ
+science,osmosis,परासरण,परासरण,சவ்வூடு பரவல்,অভিস্রবণ
+science,nucleus,केन्द्रक,केंद्रक,உட்கரு,নিউক্লিয়াস
+science,atom,परमाणु,अणु,அணு,পরমাণু
+science,molecule,अणु,रेणू,மூலக்கூறு,অণু
+science,evolution,विकास,उत्क्रांती,பரிணாமம்,বিবর্তন
+science,chromosome,गुणसूत्र,गुणसूत्र,நிறமூர்த்தம்,ক্রোমোজোম
+science,catalyst,उत्प्रेरक,उत्प्रेरक,x觸媒,অনুঘটক
+science,hypothesis,परिकल्पना,गृहीतक,கருதுகோள்,অনুকল্প
+science,experiment,प्रयोग,प्रयोग,சோதனை,পরীক্ষা-নিরীক্ষা
+computer_science,algorithm,एल्गोरिदम (Algorithm),अल्गोरिदम (Algorithm),வழிமுறை (Algorithm),অ্যালগরিদম (Algorithm)
+computer_science,database,डेटाबेस (Database),डेटाबेस (Database),தரவுத்தளம் (Database),ডেটাবেস (Database)
+computer_science,network,नेटवर्क (Network),नेटवर्क (Network),வலையமைப்பு (Network),নেটওয়ার্ক (Network)
+computer_science,programming,प्रोग्रामिंग (Programming),प्रोग्रामिंग (Programming),நிரலாக்கம் (Programming),প্রোগ্রামিং (Programming)
+computer_science,software,सॉफ्टवेयर (Software),सॉफ्टवेअर (Software),மென்பொருள் (Software),সফটওয়্যার (Software)
+computer_science,hardware,हार्डवेयर (Hardware),हार्डवेअर (Hardware),வன்பொருள் (Hardware),হার্ডওয়্যার (Hardware)
+computer_science,artificial_intelligence,कृत्रिम बुद्धिमत्ता (AI),कृत्रिम बुद्धिमत्ता (AI),செயற்கை நுண்ணறிவு (AI),কৃত্রিম বুদ্ধিমত্তা (AI)
+computer_science,machine_learning,मशीन लर्निंग (Machine Learning),मशीन लर्निंग (Machine Learning),இயந்திர கற்றல் (Machine Learning),মেশিন লার্নিং (Machine Learning)
+economics,inflation,मुद्रास्फीति,महागाई,பணவீக்கம்,মুদ্রাস্ফীতি
+economics,gdp,सकल घरेलू उत्पाद (GDP),एकूण देशांतर्गत उत्पादन (GDP),மொத்த உள்நாட்டு உற்பத்தி (GDP),মোট অভ্যন্তরীণ উৎপাদন (GDP)
+economics,demand,माँग,मागणी,தேவை,চাহিদা
+economics,supply,आपूर्ति,पुरवठा,வழங்கல்,সরবরাহ
+economics,market,बाज़ार,बाजार,சந்தை,বাজার
+economics,capital,पूँजी,भांडवल,மூலதனம்,মূলধন
+history,civilization,सभ्यता,सभ्यता,நாகரிகம்,সভ্যতা
+history,revolution,क्रांति,क्रांती,புரட்சி,বিপ্লব
+history,independence,स्वतंत्रता,स्वातंत्र्य,சுதந்திரம்,স্বাধীনতা
+history,democracy,लोकतंत्र,लोकशाही,ஜனநாயகம்,গণতন্ত্র
+history,constitution,संविधान,संविधान,அரசியலமைப்பு,সংবিধান
+history,parliament,संसद,संसद,பாராளுமன்றம்,সংসদ

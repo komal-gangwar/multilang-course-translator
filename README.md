@@ -76,8 +76,8 @@
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-org/multilang-translator-agent.git
-cd multilang-translator-agent
+git clone https://github.com/komal-gangwar/multilang-course-translator.git
+cd multilang-course-translator
 
 # Create and activate virtual environment
 python -m venv venv
@@ -195,6 +195,23 @@ curl -X POST http://localhost:5000/api/translate \
     "subject_domain": "mathematics"
   }'
 ```
+
+---
+
+## 🏗️ System Architecture
+
+![System Architecture Diagram](docs/architecture-diagram.png)
+
+The application is organized into six layers:
+
+| Layer | Component | Responsibility |
+|---|---|---|
+| 1 — Client | Browser UI (Bootstrap 5, Dark Mode) | Dashboard, Translate, History, Documents views |
+| 2 — Web/API | Flask Routes + REST API | Page rendering, upload/translate/stats endpoints |
+| 3 — Service | Document Processor + Agent Instructions | Text extraction/chunking, prompt engineering rules |
+| 4 — RAG Pipeline | FAISS Vector Store + Knowledge Base | Multilingual embeddings, top-5 glossary retrieval |
+| 5 — AI/Model | Watsonx Client (`ibm/granite-4-h-small`) | Sends system prompt + RAG context, returns translation |
+| 6 — Persistence | SQLite DB + File Storage | Stores documents, translations, and uploaded files |
 
 ---
 
