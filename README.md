@@ -8,7 +8,7 @@
 
 | Feature | Details |
 |---|---|
-| **AI Model** | IBM Watsonx.ai — `ibm/granite-3-3-8b-instruct` |
+| **AI Model** | IBM Watsonx.ai — `ibm/granite-4-h-small` (Granite chat completion) |
 | **RAG Pipeline** | FAISS vector store + sentence-transformers (multilingual MiniLM) |
 | **Knowledge Base** | NCERT, CBSE, UGC, NEP 2020 glossaries + curriculum frameworks |
 | **Document Support** | PDF, PPTX, DOCX, TXT, Markdown (up to 25 MB) |
@@ -295,6 +295,12 @@ ibmcloud ce application create \
 
 ---
 
+## 📝 A Note on Model Selection
+
+During development, multiple IBM Granite chat models were evaluated (`ibm/granite-3-3-8b-instruct`, `ibm/granite-3-1-8b-base`) before settling on **`ibm/granite-4-h-small`**, which is the model actively supported and verified working in this Watsonx.ai project environment for chat completion. `meta-llama/llama-3-3-70b-instruct` is used as an automatic fallback in case of quota limits or temporary model unavailability, ensuring the translation pipeline stays functional end-to-end.
+
+---
+
 ## 🔧 Configuration Reference
 
 | Variable | Default | Description |
@@ -304,7 +310,7 @@ ibmcloud ce application create \
 | `IBM_WATSONX_PROJECT_ID` | — | Your Watsonx project ID (**required**) |
 | `FLASK_SECRET_KEY` | — | Flask session secret (**required**) |
 | `FLASK_ENV` | `development` | `production` for deployment |
-| `TRANSLATION_MODEL` | `ibm/granite-3-3-8b-instruct` | Watsonx model ID |
+| `TRANSLATION_MODEL` | `ibm/granite-4-h-small` | Watsonx model ID |
 | `EMBEDDING_MODEL` | `paraphrase-multilingual-MiniLM-L12-v2` | Sentence transformer model |
 | `MAX_CONTENT_LENGTH_MB` | `25` | Max upload file size |
 | `VECTOR_STORE_PATH` | `app/data/vector_store` | FAISS index location |
@@ -343,4 +349,4 @@ MIT License — see `LICENSE` for details.
 
 ---
 
-*Built with IBM Watsonx.ai · Granite · FAISS · Flask · Bootstrap 5*
+*Built with IBM Watsonx.ai · Granite (`granite-4-h-small`) · FAISS · Flask · Bootstrap 5*
